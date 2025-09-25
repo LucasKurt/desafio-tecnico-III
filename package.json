@@ -1,0 +1,18 @@
+{
+  "name": "desafio-tecnico-iii",
+  "version": "1.0.0",
+  "description": "📝 **Task: Cadastro de Pacientes e Exames Médicos com Modalidades DICOM**",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "husky",
+    "commitlint": "commitlint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^20.0.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "husky": "^9.1.7"
+  }
+}
