@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+CHANGED="$(git diff --cached --name-only)"
+
+
+if printf "%s" "$CHANGED" | grep -q "^backend/"; then
+  echo "→ lint-staged (backend)"
+  npm --prefix backend run lint-staged
+fi
+
+# if printf "%s" "$CHANGED" | grep -q "^frontend/"; then
+#   echo "→ lint-staged (frontend)"
+#   npm --prefix frontend run lint-staged
+# fi

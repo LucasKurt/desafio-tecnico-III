@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+set -e
+npm run commitlint -- -e "$1"
