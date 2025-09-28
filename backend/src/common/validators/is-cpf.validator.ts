@@ -1,7 +1,7 @@
-import { registerDecorator, ValidationArguments, ValidationOptions } from 'class-validator';
+import { registerDecorator, ValidationOptions } from 'class-validator';
 
 export function cleanCpf(value: string): string {
-  return String(value ?? '').replace(/\D/g, '');
+  return String(value).replace(/\D/g, '');
 }
 
 function isValidCPF(raw: string): boolean {
@@ -36,15 +36,6 @@ export function IsCPF(validationOptions?: ValidationOptions) {
       validator: {
         validate(value: string): boolean {
           return isValidCPF(value);
-        },
-        defaultMessage(args?: ValidationArguments): string {
-          const message = validationOptions?.message;
-
-          if (typeof message === 'function') {
-            return message(args as ValidationArguments);
-          }
-
-          return message ?? `${args?.property ?? 'cpf'} inválido`;
         },
       },
     });
