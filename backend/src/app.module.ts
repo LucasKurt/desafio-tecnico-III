@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { baseTypeOrmOptions } from './database/typeorm.options';
+import { PatientsModule } from './patients/patients.module';
 
 @Module({
   imports: [
@@ -16,8 +15,7 @@ import { baseTypeOrmOptions } from './database/typeorm.options';
         logging: true,
       }),
     }),
+    PatientsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

@@ -18,7 +18,6 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm:ds": "node ./node_modules/typeorm/cli.js -d ./dist/database/data-source.js",
     "migration:create": "npm run build && npm run typeorm:ds migration:create ./src/database/migrations/Manual",
     "migration:generate": "npm run build && npm run typeorm:ds migration:generate ./src/database/migrations/Auto",
@@ -58,6 +57,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
+    "better-sqlite3": "^12.4.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -76,19 +76,37 @@
   },
   "jest": {
     "moduleFileExtensions": [
+      "ts",
       "js",
-      "json",
-      "ts"
+      "json"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": ".",
+    "testRegex": [
+      ".*\\.spec\\.ts$",
+      ".*\\.e2e-spec.ts$"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**/*.ts",
+      "!src/**/*.spec.ts",
+      "!src/**/*.module.ts",
+      "!src/main.ts",
+      "!src/database/**"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "coverageThreshold": {
+      "global": {
+        "statements": 80,
+        "branches": 80,
+        "functions": 80,
+        "lines": 80
+      }
+    },
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/src/$1"
+    }
   }
 }
