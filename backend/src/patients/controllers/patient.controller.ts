@@ -1,8 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PaginatedDto } from 'src/common/pagination/page';
+import { PageOptionsDto, PaginatedDto } from 'src/common/pagination/page';
 import { CreatePatientDto } from '../dtos/create-patient.dto';
-import { ListPatientsQueryDto } from '../dtos/list-patients-query.dto';
 import { PatientResponseDto } from '../dtos/patient-response.dto';
 import { PatientService } from '../services/patient.service';
 
@@ -19,7 +18,7 @@ export class PatientController {
 
   @Get()
   @ApiOkResponse({ type: PaginatedDto(PatientResponseDto) })
-  list(@Query() q: ListPatientsQueryDto) {
+  list(@Query() q: PageOptionsDto) {
     return this.service.list(q);
   }
 }

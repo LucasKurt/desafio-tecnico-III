@@ -1,9 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { buildPage, Page } from 'src/common/pagination/page';
+import { buildPage, Page, PageOptionsDto } from 'src/common/pagination/page';
 import { Repository } from 'typeorm';
 import { CreatePatientDto } from '../dtos/create-patient.dto';
-import { ListPatientsQueryDto } from '../dtos/list-patients-query.dto';
 import { PatientResponseDto } from '../dtos/patient-response.dto';
 import { Patient } from '../entities/patient.entity';
 
@@ -30,7 +29,7 @@ export class PatientService {
     return new PatientResponseDto(saved);
   }
 
-  async list({ page = 1, pageSize = 10 }: ListPatientsQueryDto): Promise<Page<PatientResponseDto>> {
+  async list({ page = 1, pageSize = 10 }: PageOptionsDto): Promise<Page<PatientResponseDto>> {
     const currentPage = Math.max(page, 1);
     const limit = Math.min(pageSize, 100);
     const skip = (currentPage - 1) * limit;
