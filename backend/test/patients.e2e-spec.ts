@@ -1,23 +1,34 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { baseTypeOrmOptions } from 'src/database/typeorm.options';
 import { Patient } from 'src/patients/entities/patient.entity';
 import { PatientsModule } from 'src/patients/patients.module';
 import request from 'supertest';
+import { DataSource, DataSourceOptions } from 'typeorm';
+
+const schema = `test_${process.env.JEST_WORKER_ID ?? '1'}`;
 
 describe('Patients (e2e)', () => {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const modRef = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: 'better-sqlite3',
-          database: ':memory:',
-          dropSchema: true,
-          synchronize: true,
-          entities: [Patient],
-          logging: false,
+        TypeOrmModule.forRootAsync({
+          useFactory: () => ({
+            ...baseTypeOrmOptions(),
+            entities: [Patient],
+            schema,
+            retryAttempts: 0,
+          }),
+          async dataSourceFactory(options?: DataSourceOptions) {
+            const ds = new DataSource(options!);
+            await ds.initialize();
+            await ds.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`);
+            await ds.synchronize();
+            return ds;
+          },
         }),
         PatientsModule,
       ],
@@ -28,19 +39,24 @@ describe('Patients (e2e)', () => {
     await app.init();
   });
 
-  afterEach(async () => {
+  beforeEach(async () => {
+    const dataSource = app.get(DataSource);
+    await dataSource.synchronize(true);
+  });
+
+  afterAll(async () => {
     await app.close();
   });
 
   const http = () => request(app.getHttpServer());
 
   it('POST /patients 201', async () => {
-    const res = await http()
+    const { body: patient } = await http()
       .post('/patients')
-      .send({ name: 'Alice', birthDate: '1990-08-11', cpf: '29645684056' });
+      .send({ name: 'Alice', birthDate: '1990-08-11', cpf: '29645684056' })
+      .expect(201);
 
-    expect(res.status).toBe(201);
-    expect(res.body).toEqual(
+    expect(patient).toEqual(
       expect.objectContaining({
         id: expect.stringMatching(/^[0-9a-f-]{36}$/i),
         name: 'Alice',
@@ -58,28 +74,28 @@ describe('Patients (e2e)', () => {
       .send({ name: 'Alice', birthDate: '1990-08-11', cpf: validCpf })
       .expect(201);
 
-    const res = await http()
+    const {
+      body: { message },
+    } = await http()
       .post('/patients')
-      .send({ name: 'Bob', birthDate: '1995-01-01', cpf: validCpf });
+      .send({ name: 'Bob', birthDate: '1995-01-01', cpf: validCpf })
+      .expect(409);
 
-    expect(res.status).toBe(409);
-    const msgs = Array.isArray(res.body?.message)
-      ? res.body.message.join(' | ')
-      : String(res.body?.message ?? '');
+    const msgs = Array.isArray(message) ? message.join(' | ') : String(message ?? '');
     expect(msgs).toMatch(/cpf já cadastrado/i);
   });
 
   it.each(['11111111111', '12345678900', '123456789'])(
     'POST /patients 400 - cpf inválido (%s)',
     async (badCpf) => {
-      const res = await http()
+      const {
+        body: { message },
+      } = await http()
         .post('/patients')
-        .send({ name: 'Alice', birthDate: '1990-08-11', cpf: badCpf });
+        .send({ name: 'Alice', birthDate: '1990-08-11', cpf: badCpf })
+        .expect(400);
 
-      expect(res.status).toBe(400);
-      const msgs = Array.isArray(res.body.message)
-        ? res.body.message.join(' | ')
-        : String(res.body.message);
+      const msgs = Array.isArray(message) ? message.join(' | ') : String(message);
       expect(msgs).toMatch(/CPF inválido/i);
     },
   );
@@ -93,11 +109,11 @@ describe('Patients (e2e)', () => {
       { name: 'Alice', birthDate: '1990-08-11', cpf: '65839899054' },
     ];
 
-    patients.forEach(async (patient) => await http().post('/patients').send(patient).expect(201));
+    await Promise.all(patients.map((p) => http().post('/patients').send(p).expect(201)));
 
-    const res = await http().get('/patients').expect(200);
+    const { body: patientsPage } = await http().get('/patients').expect(200);
 
-    expect(res.body).toEqual(
+    expect(patientsPage).toEqual(
       expect.objectContaining({
         items: expect.any(Array),
         total: 5,
@@ -109,8 +125,8 @@ describe('Patients (e2e)', () => {
       }),
     );
 
-    for (const item of res.body.items) {
-      expect(item).toEqual(
+    for (const patient of patientsPage.items) {
+      expect(patient).toEqual(
         expect.objectContaining({
           id: expect.stringMatching(
             /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
@@ -132,11 +148,11 @@ describe('Patients (e2e)', () => {
       { name: 'Alice', birthDate: '1990-08-11', cpf: '65839899054' },
     ];
 
-    patients.forEach(async (patient) => await http().post('/patients').send(patient).expect(201));
+    await Promise.all(patients.map((p) => http().post('/patients').send(p).expect(201)));
 
-    const res = await http().get('/patients?page=2&pageSize=2').expect(200);
+    const { body: patientsPage } = await http().get('/patients?page=2&pageSize=2').expect(200);
 
-    expect(res.body).toEqual(
+    expect(patientsPage).toEqual(
       expect.objectContaining({
         items: expect.any(Array),
         total: 5,
@@ -148,8 +164,8 @@ describe('Patients (e2e)', () => {
       }),
     );
 
-    for (const item of res.body.items) {
-      expect(item).toEqual(
+    for (const patient of patientsPage.items) {
+      expect(patient).toEqual(
         expect.objectContaining({
           id: expect.stringMatching(
             /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,

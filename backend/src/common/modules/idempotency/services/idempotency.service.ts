@@ -20,6 +20,7 @@ export class IdempotencyService {
       .where('k.idempotencyKey = :idempotencyKey', { idempotencyKey })
       .getOne();
 
+    // istanbul ignore next
     if (!row) throw new Error('Idempotency key row not found after insert');
 
     return row;

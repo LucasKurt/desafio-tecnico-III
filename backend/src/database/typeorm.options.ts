@@ -1,6 +1,6 @@
-import { DataSourceOptions } from 'typeorm';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions.js';
 
-export function baseTypeOrmOptions(): DataSourceOptions {
+export function baseTypeOrmOptions(): PostgresConnectionOptions {
   return {
     type: 'postgres',
     host: process.env.DB_HOST ?? 'localhost',

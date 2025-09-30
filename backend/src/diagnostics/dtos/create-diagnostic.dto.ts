@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import { IsEnum, IsUUID } from 'class-validator';
 import { ImagingModality } from '../enums/imaging-modality.enum';
 
@@ -13,9 +12,8 @@ export class CreateDiagnosticDto {
   patientId: string;
 
   @ApiProperty({ enum: ImagingModality, enumName: 'ImagingModality' })
-  @Transform(({ value }) => (typeof value === 'string' ? value.toUpperCase() : value))
   @IsEnum(ImagingModality, {
-    message: 'modality inválida. Use: CR, CT, DX, MG, MR, NM, OT, PT, RF, US, XA',
+    message: 'modalidade inválida. Use: CR, CT, DX, MG, MR, NM, OT, PT, RF, US, XA',
   })
   modality: ImagingModality;
 }

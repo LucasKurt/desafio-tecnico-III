@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createHash } from 'node:crypto';
 import { IdempotencyService } from 'src/common/modules/idempotency/services/idempotency.service';
@@ -32,7 +27,7 @@ export class DiagnosticService {
     if (!idempotencyKey) throw new BadRequestException('Idempotency-Key obrigatória');
 
     const patientExists = await this.patientRepository.existsBy({ id: patientId });
-    if (!patientExists) throw new NotFoundException('paciente não encontrado');
+    if (!patientExists) throw new BadRequestException('paciente não encontrado');
 
     const requestHash = createHash('sha256')
       .update(JSON.stringify({ patientId, modality }))
