@@ -7,7 +7,7 @@ if printf "%s" "$CHANGED" | grep -q "^backend/"; then
   npm --prefix backend run lint-staged
 fi
 
-# if printf "%s" "$CHANGED" | grep -q "^frontend/"; then
-#   echo "→ lint-staged (frontend)"
-#   npm --prefix frontend run lint-staged
-# fi
+if printf "%s" "$CHANGED" | grep -q "^frontend/"; then
+  echo "→ lint-staged (frontend)"
+  npm --prefix frontend run lint-staged
+fi
