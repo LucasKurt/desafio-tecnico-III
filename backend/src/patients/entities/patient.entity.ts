@@ -11,7 +11,7 @@ export class Patient {
   @Column({ type: 'date', name: 'birth_date' })
   birthDate: string;
 
-  @Index({ unique: true })
+  @Index('UQ_patients_cpf', ['cpf'], { unique: true })
   @Column({ length: 11 })
   cpf: string;
 }

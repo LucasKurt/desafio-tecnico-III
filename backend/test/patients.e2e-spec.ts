@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CpfExceptionFilter } from 'src/common/filters/cpf-exception.filter';
 import { baseTypeOrmOptions } from 'src/database/typeorm.options';
 import { Patient } from 'src/patients/entities/patient.entity';
 import { PatientsModule } from 'src/patients/patients.module';
@@ -36,6 +37,7 @@ describe('Patients (e2e)', () => {
 
     app = modRef.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalFilters(new CpfExceptionFilter());
     await app.init();
   });
 
@@ -83,6 +85,29 @@ describe('Patients (e2e)', () => {
 
     const msgs = Array.isArray(message) ? message.join(' | ') : String(message ?? '');
     expect(msgs).toMatch(/cpf já cadastrado/i);
+  });
+
+  it('POST /patients 409 - requisições concorrentes', async () => {
+    const payload = { name: 'Alice', birthDate: '1990-08-11', cpf: '29645684056' };
+    const calls = Array.from({ length: 100 }, () => http().post('/patients').send(payload));
+
+    const settled = await Promise.allSettled(calls);
+
+    let status201 = 0;
+    for (const r of settled) {
+      const res = r.status === 'fulfilled' ? r.value : r.reason;
+      expect([201, 409]).toContain(res.status);
+
+      if (res.status === 201) status201++;
+      if (res.status === 409) {
+        const msg = Array.isArray(res.body?.message)
+          ? res.body.message.join(' | ')
+          : String(res.body?.message ?? '');
+        expect(msg).toMatch(/cpf já cadastrado/i);
+      }
+    }
+
+    expect(status201).toBe(1);
   });
 
   it.each(['11111111111', '12345678900', '123456789'])(

@@ -1,3 +1,4 @@
+import { Type as CustomType } from '@nestjs/common';
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional, getSchemaPath } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
@@ -51,13 +52,17 @@ class PaginatedBaseDto {
   @ApiProperty() hasPrev: boolean;
 }
 
-type ClassConstructor<T> = abstract new (...args: unknown[]) => T;
-
-export function PaginatedDto<T>(model: ClassConstructor<T>) {
-  @ApiExtraModels(model)
-  class PaginatedOfModel extends PaginatedBaseDto {
+export function PaginatedDto<T>(
+  model: CustomType<T>,
+): CustomType<PaginatedBaseDto & { items: T[] }> {
+  class PaginatedGeneric extends PaginatedBaseDto {
     @ApiProperty({ type: 'array', items: { $ref: getSchemaPath(model) } })
     items!: T[];
   }
-  return PaginatedOfModel;
+
+  const schemaName = `Paginated${model.name}`;
+  Object.defineProperty(PaginatedGeneric, 'name', { value: schemaName });
+  ApiExtraModels(model)(PaginatedGeneric);
+
+  return PaginatedGeneric as unknown as CustomType<PaginatedBaseDto & { items: T[] }>;
 }
