@@ -1,0 +1,47 @@
+<main>
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-title> Cadastrar Exame </mat-card-title>
+        <button mat-flat-button color="primary" routerLink="../">Voltar</button>
+      </mat-card-title-group>
+    </mat-card-header>
+
+    <form [formGroup]="form" (ngSubmit)="save()" autocomplete="on">
+      <mat-card-content>
+        <mat-form-field class="w-80">
+          <mat-label>Paciente</mat-label>
+          <input matInput formControlName="patient" [matAutocomplete]="auto" />
+          <mat-autocomplete
+            #auto="matAutocomplete"
+            [displayWith]="displayPatient"
+            (optionSelected)="onPatientSelected($event.option.value)"
+          >
+            @for (p of filteredPatients$ | async; track p.id) {
+              <mat-option [value]="p">{{ p.name }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (form.get('patient')?.hasError('required')) {
+            <mat-error> Selecione um paciente </mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="w-80">
+          <mat-label>Modalidade DICON</mat-label>
+          <mat-select matInput formControlName="modality">
+            @for (m of modalities; track m) {
+              <mat-option [value]="m">{{ modalityLabel[m] }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('modality')?.hasError('required')) {
+            <mat-error> Selecione Uma Modalidade </mat-error>
+          }
+        </mat-form-field>
+      </mat-card-content>
+
+      <mat-card-footer>
+        <button mat-flat-button color="primary" type="submit">Cadastrar</button>
+      </mat-card-footer>
+    </form>
+  </mat-card>
+</main>

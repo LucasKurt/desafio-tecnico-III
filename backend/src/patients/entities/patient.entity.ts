@@ -5,6 +5,7 @@ export class Patient {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index('IDX_patients_name', ['name'])
   @Column({ length: 120 })
   name: string;
 

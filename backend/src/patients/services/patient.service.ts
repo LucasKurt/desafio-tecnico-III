@@ -1,8 +1,9 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { buildPage, Page, PageOptionsDto } from 'src/common/pagination/page';
-import { Repository } from 'typeorm';
+import { buildPage, Page } from 'src/common/pagination/page';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { CreatePatientDto } from '../dtos/create-patient.dto';
+import { PatientPageOptionsDto } from '../dtos/patient-page-options.dto';
 import { PatientResponseDto } from '../dtos/patient-response.dto';
 import { Patient } from '../entities/patient.entity';
 
@@ -29,13 +30,24 @@ export class PatientService {
     return new PatientResponseDto(saved);
   }
 
-  async list({ page = 1, pageSize = 10 }: PageOptionsDto): Promise<Page<PatientResponseDto>> {
+  async list({
+    page = 1,
+    pageSize = 10,
+    name,
+  }: PatientPageOptionsDto): Promise<Page<PatientResponseDto>> {
     const currentPage = Math.max(page, 1);
     const limit = Math.min(pageSize, 100);
     const skip = (currentPage - 1) * limit;
 
+    const where: FindOptionsWhere<Patient> = {};
+    if (name && name.trim()) {
+      const like = `%${escapeLike(name.trim())}%`;
+      where.name = ILike(like);
+    }
+
     const [rows, total] = await this.patientRepository.findAndCount({
       select: { id: true, name: true, cpf: true, birthDate: true },
+      where,
       order: { name: 'ASC', id: 'ASC' },
       skip,
       take: limit,
@@ -45,4 +57,8 @@ export class PatientService {
 
     return buildPage(items, total, currentPage, limit);
   }
+}
+
+function escapeLike(s: string) {
+  return s.replace(/[\\%_]/g, (m) => `\\${m}`);
 }
