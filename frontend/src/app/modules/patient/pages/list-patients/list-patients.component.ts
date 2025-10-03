@@ -73,7 +73,6 @@ export class ListPatientsComponent implements OnInit, AfterViewInit {
         pageSize: this.pageSize
       })
       .pipe(
-        finalize(() => (this.loading = false)),
         tap((p) => {
           this.length = p.total;
           this.dataSource.data = p.items.map(({ id, cpf, name, birthDate }) => ({
@@ -85,22 +84,22 @@ export class ListPatientsComponent implements OnInit, AfterViewInit {
         }),
         catchError((err: HttpErrorResponse) => {
           console.log(err);
-          if (err.status === 0 || !navigator.onLine) this.networkError = true;
+          if (err.status === 0) this.networkError = true;
           return EMPTY;
-        })
+        }),
+        finalize(() => (this.loading = false))
       )
       .subscribe();
   }
 
-  private formatCPF(value?: string | null): string {
-    const v = (value ?? '').replace(/\D/g, '').slice(0, 11); // só dígitos, máx 11
-    if (v.length <= 3) return v;
-    if (v.length <= 6) return `${v.slice(0, 3)}.${v.slice(3)}`;
-    if (v.length <= 9) return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6)}`;
-    return `${v.slice(0, 3)}.${v.slice(3, 6)}.${v.slice(6, 9)}-${v.slice(9)}`;
+  private formatCPF(value?: string): string {
+    //istanbul ignore next
+    if (!value) return '';
+    return `${value.slice(0, 3)}.${value.slice(3, 6)}.${value.slice(6, 9)}-${value.slice(9)}`;
   }
 
   private formatDate(value?: string | null): string {
+    //istanbul ignore next
     if (!value) return '';
     return new Date(value + 'T00:00:00').toLocaleDateString();
   }

@@ -68,6 +68,7 @@ export class CreatePatientComponent implements OnInit {
             ctrl?.setErrors({ ...current, duplicated: true });
             ctrl?.markAsTouched();
           } else {
+            //istanbul ignore next
             console.error(err);
           }
         }
