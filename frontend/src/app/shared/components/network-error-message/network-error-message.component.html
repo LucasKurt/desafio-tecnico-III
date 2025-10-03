@@ -1,0 +1,14 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title-group>
+      <mat-card-title>
+        <mat-icon>cloud_off</mat-icon>
+        Falha de conexão com a Rede
+      </mat-card-title>
+      <mat-card-subtitle>Verifique sua conexão e tente novamente.</mat-card-subtitle>
+    </mat-card-title-group>
+  </mat-card-header>
+  <mat-card-footer>
+    <button mat-flat-button class="w-100" (click)="retry.emit()">Tentar novamente</button>
+  </mat-card-footer>
+</mat-card>
