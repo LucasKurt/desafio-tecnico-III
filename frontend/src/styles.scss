@@ -1,4 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light dark;
+  @include mat.theme(
+    (
+      color: mat.$rose-palette,
+      typography: (
+        plain-family: Roboto,
+        brand-family: Open Sans,
+        bold-weight: 900,
+        medium-weight: 500,
+        regular-weight: 300
+      ),
+      density: 0
+    )
+  );
+}
 
 html,
 body {
@@ -6,5 +23,28 @@ body {
 }
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: var(--mat-sys-surface);
+
+  main {
+    padding: 3rem;
+  }
+
+  .w-80 {
+    width: 80%;
+  }
+
+  .w-100 {
+    width: 100%;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.6);
+    z-index: 2;
+    pointer-events: all;
+  }
 }

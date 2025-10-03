@@ -1,0 +1,51 @@
+<main>
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-title> Cadastrar Paciente </mat-card-title>
+        <button mat-flat-button color="primary" routerLink="../">Voltar</button>
+      </mat-card-title-group>
+    </mat-card-header>
+    <form [formGroup]="form" (ngSubmit)="save()" autocomplete="on">
+      <mat-card-content>
+        <mat-form-field class="w-80">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="name" />
+          @if (form.get('name')?.hasError('required')) {
+            <mat-error> Campo obrigatório </mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="w-80">
+          <mat-label>CPF</mat-label>
+          <input matInput formControlName="cpf" />
+          @if (form.get('cpf')?.hasError('required')) {
+            <mat-error> Campo obrigatório </mat-error>
+          }
+          @if (form.get('cpf')?.hasError('cpfInvalid')) {
+            <mat-error>
+              {{ form.get('cpf')?.getError('cpf') }}
+            </mat-error>
+          }
+          @if (form.get('cpf')?.touched && form.get('cpf')?.hasError('duplicated')) {
+            <mat-error> Este CPF já está cadastrado </mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="w-80">
+          <mat-label>Data de Nascimento</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="birthDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          @if (form.get('birthDate')?.hasError('required')) {
+            <mat-error> Campo obrigatório </mat-error>
+          }
+        </mat-form-field>
+      </mat-card-content>
+
+      <mat-card-footer>
+        <button mat-flat-button color="primary" type="submit">Cadastrar</button>
+      </mat-card-footer>
+    </form>
+  </mat-card>
+</main>
