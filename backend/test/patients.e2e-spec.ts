@@ -164,28 +164,30 @@ describe('Patients (e2e)', () => {
     }
   });
 
-  it('GET /patients 200', async () => {
+  it('GET /patients (page=1, pageSize=2, name=Al) paginação 200', async () => {
     const patients = [
       { name: 'Alice', birthDate: '1990-08-11', cpf: '29645684056' },
-      { name: 'Alice', birthDate: '1990-08-11', cpf: '66833262071' },
-      { name: 'Alice', birthDate: '1990-08-11', cpf: '91935915002' },
-      { name: 'Alice', birthDate: '1990-08-11', cpf: '68040926009' },
-      { name: 'Alice', birthDate: '1990-08-11', cpf: '65839899054' },
+      { name: 'Marcos', birthDate: '1990-08-11', cpf: '66833262071' },
+      { name: 'Marcos', birthDate: '1990-08-11', cpf: '91935915002' },
+      { name: 'Marcos', birthDate: '1990-08-11', cpf: '68040926009' },
+      { name: 'Bruno', birthDate: '1990-08-11', cpf: '65839899054' },
     ];
 
     await Promise.all(patients.map((p) => http().post('/patients').send(p).expect(201)));
 
-    const { body: patientsPage } = await http().get('/patients?page=2&pageSize=2').expect(200);
+    const { body: patientsPage } = await http()
+      .get('/patients?page=1&pageSize=2&name=Al')
+      .expect(200);
 
     expect(patientsPage).toEqual(
       expect.objectContaining({
         items: expect.any(Array),
-        total: 5,
-        page: 2,
+        total: 1,
+        page: 1,
         pageSize: 2,
-        totalPages: 3,
-        hasNext: true,
-        hasPrev: true,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
       }),
     );
 
@@ -195,9 +197,9 @@ describe('Patients (e2e)', () => {
           id: expect.stringMatching(
             /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
           ),
-          name: expect.any(String),
-          cpf: expect.any(String),
-          birthDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}/),
+          name: expect.stringContaining('Alice'),
+          cpf: expect.stringContaining('29645684056'),
+          birthDate: expect.stringContaining('1990-08-11'),
         }),
       );
     }

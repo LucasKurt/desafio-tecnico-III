@@ -8,9 +8,8 @@ import { AppComponent } from './app.component';
 @Component({ template: '<p>Patients Works</p>' })
 class PatientsStub {}
 
-// TODO: habilitar quando a rota de diagnostics estiver pronta
-// @Component({ template: '<p>Diagnostics Works</p>' })
-// class DiagnosticsStub {}
+@Component({ template: '<p>Diagnostics Works</p>' })
+class DiagnosticsStub {}
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -19,15 +18,11 @@ describe('AppComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        AppComponent,
-        PatientsStub
-        // DiagnosticsStub,
-      ],
+      imports: [AppComponent, PatientsStub, DiagnosticsStub],
       providers: [
         provideRouter([
           { path: 'patients', component: PatientsStub },
-          // { path: 'diagnostics', component: DiagnosticsStub }, // TODO
+          { path: 'diagnostics', component: DiagnosticsStub },
           { path: '', redirectTo: 'patients', pathMatch: 'full' }
         ]),
         provideLocationMocks()
@@ -40,17 +35,17 @@ describe('AppComponent', () => {
     router = TestBed.inject(Router);
   });
 
-  it('should create the app', () => {
+  it('deve criar o app', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render toolbar buttons', () => {
+  it('deve renderizar a barra de navegação', () => {
     const buttons = fixture.debugElement.queryAll(By.css('mat-toolbar button'));
     const labels = buttons.map((b) => (b.nativeElement as HTMLButtonElement).textContent?.trim());
     expect(labels).toEqual(['Pacientes', 'Exames']);
   });
 
-  it('buttons should have correct routerLinks', () => {
+  it('deve conter os botões com as rotas corretas', () => {
     const [btnPatients, btnDiagnostics] = fixture.debugElement.queryAll(
       By.css('mat-toolbar button')
     );
@@ -58,36 +53,28 @@ describe('AppComponent', () => {
     expect(btnDiagnostics.attributes['ng-reflect-router-link']).toBe('diagnostics');
   });
 
-  // TODO: habilitar depois — depende da rota /diagnostics existir
-  // it('should navigate and toggle active class for diagnostics', async () => {
-  //   const fixture = TestBed.createComponent(AppComponent);
-  //   const router = TestBed.inject(Router);
+  it('deve navegar para a rota de paciente ou exames como a classe active ativa', async () => {
+    await router.navigateByUrl('/patients');
+    fixture.detectChanges();
+    let [btnPatients, btnDiagnostics] = fixture.debugElement.queryAll(By.css('mat-toolbar button'));
+    expect(btnPatients.nativeElement.classList).toContain('active');
+    expect(btnDiagnostics.nativeElement.classList).not.toContain('active');
 
-  //   await router.navigateByUrl('/patients');
-  //   fixture.detectChanges();
-  //   let [btnPatients, btnDiagnostics] = fixture.debugElement.queryAll(By.css('mat-toolbar button'));
-  //   expect(btnPatients.nativeElement.classList).toContain('active');
-  //   expect(btnDiagnostics.nativeElement.classList).not.toContain('active');
+    await router.navigateByUrl('/diagnostics');
+    fixture.detectChanges();
 
-  //   await router.navigateByUrl('/diagnostics'); // precisa da rota pronta
-  //   fixture.detectChanges();
+    [btnPatients, btnDiagnostics] = fixture.debugElement.queryAll(By.css('mat-toolbar button'));
+    expect(btnPatients.nativeElement.classList).not.toContain('active');
+    expect(btnDiagnostics.nativeElement.classList).toContain('active');
+  });
 
-  //   [btnPatients, btnDiagnostics] = fixture.debugElement.queryAll(By.css('mat-toolbar button'));
-  //   expect(btnPatients.nativeElement.classList).not.toContain('active');
-  //   expect(btnDiagnostics.nativeElement.classList).toContain('active');
-  // });
-
-  it('should render routed component in the outlet (patients)', async () => {
+  it('deve exibir o componente patients na pagina corretamente', async () => {
     await router.navigateByUrl('/patients');
     expect(fixture.nativeElement.textContent).toContain('Patients Works');
   });
 
-  // TODO: habilitar depois — depende da rota /diagnostics existir
-  // it('should render routed component in the outlet (diagnostics)', async () => {
-  //   const fixture = TestBed.createComponent(AppComponent);
-  //   const router = TestBed.inject(Router);
-  //   await router.navigateByUrl('/diagnostics');
-  //   fixture.detectChanges();
-  //   expect(fixture.nativeElement.textContent).toContain('Diagnostics Works');
-  // });
+  it('deve exibir o componente patients na pagina corretamente', async () => {
+    await router.navigateByUrl('/diagnostics');
+    expect(fixture.nativeElement.textContent).toContain('Diagnostics Works');
+  });
 });

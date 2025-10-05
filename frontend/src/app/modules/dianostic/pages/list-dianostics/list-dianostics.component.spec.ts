@@ -1,39 +1,33 @@
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatPaginatorHarness } from '@angular/material/paginator/testing';
-import { By } from '@angular/platform-browser';
+
+import { ListDianosticsComponent } from './list-dianostics.component';
 import { provideRouter } from '@angular/router';
+import { DiagnosticService } from '../../services/diagnostic.service';
 import { of, throwError } from 'rxjs';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { MatPaginatorHarness } from '@angular/material/paginator/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NetworkErrorMessageComponent } from '../../../../shared/components/network-error-message/network-error-message.component';
-import { PatientService } from '../../service/patient-service';
-import { ListPatientsComponent } from './list-patients.component';
+import { By } from '@angular/platform-browser';
+import { MatButtonHarness } from '@angular/material/button/testing';
 
-describe('ListPatientsComponent', () => {
-  let component: ListPatientsComponent;
-  let fixture: ComponentFixture<ListPatientsComponent>;
+describe('ListDianosticsComponent', () => {
+  let component: ListDianosticsComponent;
+  let fixture: ComponentFixture<ListDianosticsComponent>;
 
-  const patientSvcMock = {
+  const diagnosticsSvcMock = {
     list: jasmine.createSpy('list')
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ListPatientsComponent],
-      providers: [provideRouter([]), { provide: PatientService, useValue: patientSvcMock }]
+      imports: [ListDianosticsComponent],
+      providers: [provideRouter([]), { provide: DiagnosticService, useValue: diagnosticsSvcMock }]
     }).compileComponents();
 
-    patientSvcMock.list.and.returnValue(
+    diagnosticsSvcMock.list.and.returnValue(
       of({
-        items: [
-          {
-            id: 'add3ed6c-e3c4-43b4-9df6-761a3f4f9f0a',
-            name: 'Ana',
-            cpf: '12345678901',
-            birthDate: '1990-01-10'
-          }
-        ],
+        items: [{ id: '1', patientName: 'Ana', modalityLabel: 'Ressonância Magnética (RM)' }],
         total: 1,
         page: 1,
         pageSize: 5,
@@ -41,7 +35,7 @@ describe('ListPatientsComponent', () => {
       })
     );
 
-    fixture = TestBed.createComponent(ListPatientsComponent);
+    fixture = TestBed.createComponent(ListDianosticsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -49,7 +43,7 @@ describe('ListPatientsComponent', () => {
   it('deve inicializar corretamente', () => {
     expect(component).toBeTruthy();
 
-    expect(patientSvcMock.list).toHaveBeenCalledWith({ page: 1, pageSize: 5 });
+    expect(diagnosticsSvcMock.list).toHaveBeenCalledWith({ page: 1, pageSize: 5 });
 
     expect(component.length).toBe(1);
     expect(component.pageSize).toBe(5);
@@ -58,10 +52,9 @@ describe('ListPatientsComponent', () => {
     expect(component.networkError).toBeFalse();
 
     expect(component.dataSource.data[0]).toEqual({
-      id: 'add3ed6c-e3c4-43b4-9df6-761a3f4f9f0a',
-      name: 'Ana',
-      cpf: '123.456.789-01',
-      birthDate: '10/01/1990'
+      id: '1',
+      patientName: 'Ana',
+      modalityLabel: 'Ressonância Magnética (RM)'
     });
   });
 
@@ -83,12 +76,12 @@ describe('ListPatientsComponent', () => {
     await paginator.goToNextPage();
     fixture.detectChanges();
 
-    expect(patientSvcMock.list).toHaveBeenCalledWith({ page: 1, pageSize: 20 });
+    expect(diagnosticsSvcMock.list).toHaveBeenCalledWith({ page: 1, pageSize: 20 });
     expect(onPageSpy).toHaveBeenCalled();
   });
 
   it('deve exibir mensagem de erro quando ocorrer erro de rede', () => {
-    patientSvcMock.list.and.returnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
+    diagnosticsSvcMock.list.and.returnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
     component.onRetry();
     fixture.detectChanges();
     expect(component.networkError).toBeTrue();

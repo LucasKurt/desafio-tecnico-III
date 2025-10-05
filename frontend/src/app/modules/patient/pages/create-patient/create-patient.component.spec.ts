@@ -57,7 +57,14 @@ describe('CreatePatientComponent', () => {
       birthDate: new Date(1990, 0, 10)
     });
 
-    apiMock.create.and.returnValue(of({ id: '1' } as { id: string }));
+    apiMock.create.and.returnValue(
+      of({
+        id: '',
+        name: 'Fulano',
+        cpf: '529.982.247-25',
+        birthDate: new Date(1990, 0, 10)
+      })
+    );
 
     component.save();
 
@@ -78,7 +85,14 @@ describe('CreatePatientComponent', () => {
     });
 
     spyOn(router, 'navigate').and.resolveTo(true);
-    apiMock.create.and.returnValue(of({ id: 'abc123' } as { id: string }));
+    apiMock.create.and.returnValue(
+      of({
+        id: '',
+        name: 'Fulano',
+        cpf: '529.982.247-25',
+        birthDate: new Date(1990, 0, 10)
+      })
+    );
 
     component.save();
 

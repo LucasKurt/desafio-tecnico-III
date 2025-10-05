@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -5,15 +6,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  CreateDiagnostic,
-  ImagingModality,
-  ImagingModalityPtLabel
-} from '../../models/diagnostic.model';
-import { DiagnosticService } from '../../services/diagnostic.service';
 import {
   catchError,
   debounceTime,
@@ -25,8 +20,13 @@ import {
   switchMap
 } from 'rxjs';
 import { Patient } from '../../../patient/models/patient.model';
-import { AsyncPipe } from '@angular/common';
 import { PatientService } from '../../../patient/service/patient-service';
+import {
+  CreateDiagnostic,
+  ImagingModality,
+  ImagingModalityPtLabel
+} from '../../models/diagnostic.model';
+import { DiagnosticService } from '../../services/diagnostic.service';
 
 @Component({
   selector: 'app-create-diagnostic',
@@ -36,7 +36,7 @@ import { PatientService } from '../../../patient/service/patient-service';
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
-    MatInput,
+    MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
     RouterLink
